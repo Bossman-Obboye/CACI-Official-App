@@ -1,99 +1,134 @@
-// import 'package:cac_official/modules/hymnbook/data/models/hive/hive_hymn_model.dart';
-// import 'package:hive/hive.dart';
+import 'package:cac_official/modules/hymnbook/data/datasources/hive/local/hive_box_initializer.dart';
+import 'package:cac_official/modules/hymnbook/data/datasources/hive/local/hive_box_manager.dart';
+import 'package:cac_official/modules/hymnbook/data/models/hive/hive_hymn_model.dart';
+import 'package:hive/hive.dart';
 
-// /// A local data source for managing hymns using Hive.
-// class HiveHymnLocalDatasource {
-//   static const String _englishHymnsRepoName = 'english_hymns_repo';
-//   static const String _twiHymnRepoName = 'twi_hymn_repo';
-//   static const String _yorubaHymnRepoName = 'yoruba_hymn_repo';
-//   static const String _favoriteHymnRepoName = 'favorite_hymn_repo';
+/// A local data source for managing hymns using Hive with singleton pattern.
+class HiveHymnLocalDatasource {
 
-//  Future<List<HiveHymnModel>> _getHymnRepository(String repoName) async {
-//     if (!Hive.isBoxOpen(repoName)) {
-//       await Hive.openBox<HiveHymnModel>(repoName);
-//     }
-//   }
+  /// Private constructor for singleton pattern.
+  /// This constructor is private to prevent instantiation from outside the class.
+  /// It initializes the Hive box if it is not already open.
+  ///
+  /// The singleton pattern ensures that only one instance of this class exists
+  /// throughout the application lifecycle.// 1. Private named constructor
+  HiveHymnLocalDatasource._privateConstructor();
+  // 2. Single static instance created once
+  static final _instance = HiveHymnLocalDatasource._privateConstructor();
+  // 3. Public factory constructor returns the single instance
+  factory HiveHymnLocalDatasource() => _instance;
 
-//   /// Adds a new hymn to the repository.
-//   Future<void> addHymn(HiveHymnModel hymn, String repoName) async {
-//     final repository = await _getHymnRepository(repoName);
-//     await repository.put(hymn.id, hymn);
-//   }
+  /// Private method to get the hymn box.
+  /// This method initializes the Hive box if it is not already open.
+  Future<Box<HiveHymnModel>> _getHymnBox(String boxName) async {
+    await HiveBoxInitializer.initializeHiveBox(boxName);
+    return HiveBoxManager.getBox<HiveHymnModel>(boxName);
+  }
 
-//   /// Retrieves all hymns from the repository.
-//   Future<List<HiveHymnModel>> getAllHymns() async {
-//     final repository = await _getHymnRepository();
-//     return repository.values.toList();
-//   }
+  /// Adds a new hymn to the box.
+  Future<void> addHymn(HiveHymnModel hymn, String boxName) async {
+    final box = await _getHymnBox(boxName);
+    await box.put(hymn.id, hymn);
+  }
 
+  /// Adds multiple hymns to the box.
+  Future<void> addAll(List<HiveHymnModel> hymns, String boxName) async {
+    final box = await _getHymnBox(boxName);
+    final Map<String, HiveHymnModel> map = {
+      for (final hymn in hymns) hymn.id: hymn,
+    };
+    await box.putAll(map);
+  }
 
+  /// Returns all hymns from the box.
+  Future<List<HiveHymnModel>> getAllHymns(String boxName) async {
+    final box = await _getHymnBox(boxName);
+    return box.values.toList();
+  }
 
-//   /// Retrieves all hymns from the repository filtered by language.
-//   Future<List<HiveHymnModel>> getAllHymnsByLanguage(String language) async {
-//     final repository = await _getHymnRepository();
-//     return repository.values.where((hymn) => hymn.language == language).toList();
-//   }
+  /// Returns the number of hymns in the box.
+  Future<int> getHymnCount(String boxName) async {
+    final box = await _getHymnBox(boxName);
+    return box.length;
+  }
 
-//   /// Retrieves a hymn by its ID.
-//   // Future<HiveHymnModel?> getHymnById(String id) async {
-//   //   final repository = await _getHymnRepository();
-//   //   return repository.get(id);
-//   // }
+  /// Checks if a hymn exists by its ID.
+  Future<bool> exists(String boxName, String id) async {
+    final box = await _getHymnBox(boxName);
+    return box.containsKey(id);
+  }
 
-//   /// Retrieves a hymn by its number.
-//   Future<HiveHymnModel?> getHymnByNumber(int hymnNumber) async {
-//     final repository = await _getHymnRepository();
-//     try {
-//       return repository.values.firstWhere(
-//         (hymn) => hymn.hymnNumber == hymnNumber
-//       );
-//     } catch (_) {
-//       return null;
-//     }
-//   }
+  /// Retrieves a hymn by its ID.
+  Future<HiveHymnModel?> getHymnById(String boxName, String id) async {
+    final box = await _getHymnBox(boxName);
+    return box.get(id);
+  }
 
-//   /// Updates an existing hymn in the repository.
-//   // Future<void> updateHymn(HiveHymnModel updatedHymn) async {
-//   //   final repository = await _getHymnRepository();
-//   //   await repository.put(updatedHymn.id, updatedHymn);
-//   // }
+  /// Retrieves a hymn by its number.
+  Future<HiveHymnModel?> getHymnByNumber(String boxName, int hymnNumber) async {
+    final box = await _getHymnBox(boxName);
+    try {
+      return box.values.firstWhere((hymn) => hymn.hymnNumber == hymnNumber);
+    } catch (_) {
+      return null;
+    }
+  }
 
-//   /// Deletes a hymn by its ID.
-//   // Future<void> deleteHymn(String id) async {
-//   //   final repository = await _getHymnRepository();
-//   //   await repository.delete(id);
-//   // }
+  /// Updates a hymn by overwriting it with the same ID.
+  Future<void> updateHymn(HiveHymnModel updatedHymn, String boxName) async {
+    final box = await _getHymnBox(boxName);
+    await box.put(updatedHymn.id, updatedHymn);
+  }
 
-//   /// Deletes all hymns from the repository.
-//   // Future<void> deleteAllHymn() async {
-//   //   final repository = await _getHymnRepository();
-//   //   await repository.clear();
-//   // }
+  /// Deletes a hymn by its ID.
+  Future<void> deleteHymn(String boxName, String id) async {
+    final box = await _getHymnBox(boxName);
+    await box.delete(id);
+  }
 
-//   /// Searches hymns based on a query string.
-//   Future<List<HiveHymnModel>> searchHymns(String query) async {
-//     final repository = await _getHymnRepository();
-//     final lowerCasedQuery = query.toLowerCase();
+  /// Clears all hymns from the box.
+  Future<void> deleteAllHymns(String boxName) async {
+    final box = await _getHymnBox(boxName);
+    await box.clear();
+  }
 
-//     return repository.values.where((hymn) {
-//       final inNumber = hymn.hymnNumber.toString().contains(lowerCasedQuery);
-//       final inTitle = hymn.title.toLowerCase().contains(lowerCasedQuery);
-//       final inAuthor = hymn.author?.toLowerCase().contains(lowerCasedQuery) ?? false;
-//       final inTags = hymn.tags.any(
-//         (tag) => tag.toLowerCase().contains(lowerCasedQuery),
-//           );
-//       final inStanzas = hymn.stanzas.any(
-//         (stanza) => stanza.lines.any(
-//           (line) => line.toLowerCase().contains(lowerCasedQuery),
-//         ),
-//           );
-//       final inChoruses = hymn.choruses.any(
-//         (chorus) => chorus.lines.any(
-//           (line) => line.toLowerCase().contains(lowerCasedQuery),
-//         ),
-//           );
+  /// Searches hymns using query matching multiple fields.
+  Future<List<HiveHymnModel>> searchHymns(String boxName, String query) async {
+    final box = await _getHymnBox(boxName);
+    final lowerQuery = query.toLowerCase();
 
-//       return inNumber || inTitle || inAuthor || inTags || inStanzas || inChoruses;
-//     }).toList();
-//   }
-// }
+    return box.values.where((hymn) {
+      return hymn.hymnNumber.toString().contains(lowerQuery) ||
+          hymn.title.toLowerCase().contains(lowerQuery) ||
+          (hymn.author?.toLowerCase().contains(lowerQuery) ?? false) ||
+          hymn.tags.any((tag) => tag.toLowerCase().contains(lowerQuery)) ||
+          hymn.stanzas.any(
+            (s) => s.lines.any((l) => l.toLowerCase().contains(lowerQuery)),
+          ) ||
+          hymn.choruses.any(
+            (c) => c.lines.any((l) => l.toLowerCase().contains(lowerQuery)),
+          );
+    }).toList();
+  }
+
+  /// Filter hymns by a specific author.
+  Future<List<HiveHymnModel>> getHymnsByAuthor(
+    String boxName,
+    String author,
+  ) async {
+    final box = await _getHymnBox(boxName);
+    return box.values
+        .where((hymn) => hymn.author?.toLowerCase() == author.toLowerCase())
+        .toList();
+  }
+
+  /// Filter hymns by a specific tag.
+  Future<List<HiveHymnModel>> getHymnsByTag(String boxName, String tag) async {
+    final box = await _getHymnBox(boxName);
+    return box.values
+        .where(
+          (hymn) => hymn.tags.any((t) => t.toLowerCase() == tag.toLowerCase()),
+        )
+        .toList();
+  }
+}

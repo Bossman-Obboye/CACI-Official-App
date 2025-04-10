@@ -1,19 +1,13 @@
-import 'package:cac_official/modules/hymnbook/data/models/hive/hive_chorus_model.dart';
-import 'package:cac_official/modules/hymnbook/data/models/hive/hive_hymn_model.dart';
 import 'package:flutter/material.dart';
-import 'package:hive/hive.dart';
-import 'package:path_provider/path_provider.dart';
-
-import 'modules/hymnbook/data/models/hive/hive_stanza_model.dart';
+import 'modules/hymnbook/data/datasources/hive/local/dependencies_injections/hive_hymn_provider.dart';
+import 'modules/hymnbook/data/datasources/firebase/dependencies_injection/firebase_hymn_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  final appOfflineRepository = await getApplicationDocumentsDirectory();
-  Hive.init(appOfflineRepository.path);
 
-  Hive.registerAdapter(HiveStanzaModelAdapter());
-  Hive.registerAdapter(HiveChorusModelAdapter());
-  Hive.registerAdapter(HiveHymnModelAdapter());
+  // Register all services
+  registerFirebaseHymnDependencies();
+  await HiveServices.initialize();
 
   runApp(const CACApp());
 }

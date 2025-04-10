@@ -1,0 +1,3 @@
+class HymnFirebaseRepositoryImpl {
+  // TODO: Implement
+}
