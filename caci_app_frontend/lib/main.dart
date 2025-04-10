@@ -6,9 +6,9 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Register all services
-  registerFirebaseHymnDependencies();
   await HiveServices.initialize();
-
+  registerFirebaseHymnDependencies();
+  HiveServices.registerHiveHymnDependencies();
   runApp(const CACApp());
 }
 

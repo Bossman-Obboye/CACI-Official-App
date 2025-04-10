@@ -1,4 +1,4 @@
-package com.example.cac_official
+package com.nxttech.cacofficialapp
 
 import io.flutter.embedding.android.FlutterActivity
 

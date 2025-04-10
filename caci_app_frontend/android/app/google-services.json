@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1078814456895",
+    "project_id": "cac-official-app",
+    "storage_bucket": "cac-official-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1078814456895:android:72aacb435565103418cc8a",
+        "android_client_info": {
+          "package_name": "com.nxttech.cacofficialapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDM7ahteqrLefb7bvnsGnRUOS8Z97lF_oI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
