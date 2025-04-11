@@ -39,7 +39,9 @@ void uploadFirstTwiHymn() async {
       ]),
     ],
     choruses: [
-      ChorusModel(lines: [
+      ChorusModel(
+        chorusNumber: 1,
+        lines: [
         "Bra b[tra`m' koraa, Awu`rade pa!",
         "Ne nyinaa b[y[ w] Wo d] nti;",
         "Me koma yi mu y[ Wo trabea daa,",
@@ -50,6 +52,6 @@ void uploadFirstTwiHymn() async {
 
   // Upload to Firestore
   final firestore = FirebaseFirestore.instance;
-  await firestore.collection("hymns").add(hymn.toJson());
+  await firestore.collection("hymns").add(hymn.toJson()); 
   print("CAC DWOM 1 uploaded successfully!");
 }
